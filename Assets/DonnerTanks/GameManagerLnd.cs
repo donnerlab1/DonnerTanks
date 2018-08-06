@@ -13,6 +13,8 @@ public class GameManagerLnd : LndRpcBridge {
     public string hostname;
     public string port;
     public string certFile;
+
+    public string pubkey { get; private set; }
     public string macaroonFile;
     string cert;
     string mac;
@@ -53,7 +55,8 @@ public class GameManagerLnd : LndRpcBridge {
         await ConnectToLndWithMacaroon(hostname + ":" + port, cert, mac);
         OnInvoiceSettled += new InvoiceSettledEventHandler(ReadInvoice);
         SubscribeInvoices();
-        GetInfo();
+        var getInfo = await GetInfo();
+        pubkey = getInfo.IdentityPubkey;
     }
 	
 

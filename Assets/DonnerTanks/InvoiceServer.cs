@@ -7,6 +7,7 @@ using System.Text;
 using System;
 using UnityEngine;
 using Donner;
+using System.Text.RegularExpressions;
 
 public class InvoiceServer : MonoBehaviour {
 
@@ -14,10 +15,16 @@ public class InvoiceServer : MonoBehaviour {
     public string port;
 
     public GameManagerLnd gameManagerLnd;
+    string externalIp;
+
+
     // Use this for initialization
     void Start () {
         ws = new WebServer(SendResponse, "http://*:"+port+"/tanks/");
         ws.Run();
+
+
+        StartCoroutine(GetPublicIP());
     }
     public string SendResponse(HttpListenerRequest request)
     {
@@ -42,8 +49,12 @@ public class InvoiceServer : MonoBehaviour {
         {
             var s = gameManagerLnd.getMineInvoice(int.Parse(request.QueryString["mine"])).GetAwaiter().GetResult();
             response = contentToQr(s);
-        } else if(request.QueryString.AllKeys.Contains("channel")) {
-            response =  contentToQr("03948bb7f45969de48af8338ca8cb51b9170b6fff02c09b5dad1ebed3308bbeddd@donnerlab.com:9740");
+        }
+        else if (request.QueryString[0] == "channel")
+        {
+            Debug.Log("get channel request");
+            var s = gameManagerLnd.pubkey + "@" + externalIp + ":" + port;
+            response = contentToQr(s);
         }
 
         return response;
@@ -53,6 +64,7 @@ public class InvoiceServer : MonoBehaviour {
     void Update () {
 		
 	}
+
     void OnApplicationQuit()
     {
 
@@ -63,6 +75,19 @@ public class InvoiceServer : MonoBehaviour {
     string contentToQr(string response) {
         return "<HTML><script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script><script type='text/javascript' src='https://cdn.rawgit.com/jeromeetienne/jquery-qrcode/master/jquery.qrcode.min.js'></script><BODY><div id = 'qrcode' ><br>" + response + "</div ></BODY><script>$(document).ready(function () {jQuery('#qrcode').qrcode('" + response + "');});</script></HTML>";
     }
+    IEnumerator GetPublicIP()
+    {
+        using (WWW www = new WWW("https://ipv4.myexternalip.com/raw"))
+        {
+            yield return www;
+            var temp = www.text;
+            Regex.Replace(temp, @"\s+", "");
+            externalIp = LndHelper.RemoveWhitespace(temp);
+            Debug.Log(www.text);
+
+        }
+    }
+}
 }
 
 

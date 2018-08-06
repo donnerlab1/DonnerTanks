@@ -12,4 +12,5 @@ public class LndConfig {
     public string Port;
     public string TlsFile;
     public string MacaroonFile;
+    public string ListenPort;
 }

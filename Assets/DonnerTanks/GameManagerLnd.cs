@@ -32,19 +32,21 @@ public class GameManagerLnd : LndRpcBridge {
 
     public TankLnd p1Donner;
     public TankLnd p2Donner;
-    LndConfig config;
+    public InvoiceServer webServer;
+   public DonnerTanksConfig config { get; private set; }
 
-
+    
     async void Start () {
+
         if (readConfig)
         {
-            config = LndHelper.ReadConfigFile(Application.dataPath + "/Resources/donner.conf");
+            config = readConfigFile(Application.dataPath + "/Resources/donnertanks.conf");
+            Debug.Log(config.WebServerPort);
         }
         else
         {
-            config = new LndConfig { Hostname = hostname, Port = port, MacaroonFile = macaroonFile, TlsFile = certFile };
+            config = new DonnerTanksConfig { Hostname = hostname, Port = port, MacaroonFile = macaroonFile, TlsFile = certFile };
         }
-
         LndHelper.SetupEnvironmentVariables();
 
         cert = File.ReadAllText(Application.dataPath + "/Resources/" + config.TlsFile);
@@ -57,6 +59,7 @@ public class GameManagerLnd : LndRpcBridge {
         SubscribeInvoices();
         var getInfo = await GetInfo();
         pubkey = getInfo.IdentityPubkey;
+        webServer.StartServer(config.WebServerIp, config.WebServerPort);
     }
 	
 
@@ -149,5 +152,14 @@ public class GameManagerLnd : LndRpcBridge {
         Shutdown();
     }
 
-    
+    DonnerTanksConfig readConfigFile(string url)
+    {
+        if (File.Exists(url))
+        {
+            var dataString = File.ReadAllText(url);
+            UnityEngine.Debug.Log(dataString);
+            return JsonUtility.FromJson<DonnerTanksConfig>(dataString);
+        }
+        else { return null; }
+    }
 }

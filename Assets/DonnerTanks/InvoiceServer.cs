@@ -18,9 +18,10 @@ public class InvoiceServer : MonoBehaviour {
     string externalIp;
 
 
-    // Use this for initialization
-    void Start () {
-        ws = new WebServer(SendResponse, "http://*:"+port+"/tanks/");
+    
+    public void StartServer(string ip, string port)
+    {
+        ws = new WebServer(SendResponse, "http://" + ip + ":" + port + "/tanks/");
         ws.Run();
 
 
@@ -28,7 +29,7 @@ public class InvoiceServer : MonoBehaviour {
     }
     public string SendResponse(HttpListenerRequest request)
     {
-        var response = "Wrong Query, tanks?speed=1 or 2 for speedboost(10 seconds, 50 sat); /tanks?shield=1 or 2 for shield(5 seconds, 25 sat); /powerup?tanks=1 or 2 for mine at player(40 sat);";
+        var response = "Wrong Query, tanks?speed=1 or 2 for speedboost(10 seconds, 50 sat); /tanks?shield=1 or 2 for shield(5 seconds, 25 sat); /tanks?mine=1 or 2 for mine at player(40 sat); /tanks?channel for channel information";
         
         
         if (request.QueryString.AllKeys.Contains("speed"))
@@ -53,7 +54,7 @@ public class InvoiceServer : MonoBehaviour {
         else if (request.QueryString[0] == "channel")
         {
             Debug.Log("get channel request");
-            var s = gameManagerLnd.pubkey + "@" + externalIp + ":" + port;
+            var s = gameManagerLnd.pubkey + "@" + externalIp + ":" + gameManagerLnd.config.ListenPort;
             response = contentToQr(s);
         }
 
@@ -88,6 +89,6 @@ public class InvoiceServer : MonoBehaviour {
         }
     }
 }
-}
+
 
 

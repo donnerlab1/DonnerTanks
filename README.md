@@ -16,4 +16,4 @@ DonnerTanks! is a arcade arena tank brawler with micropayments. It is based on [
 ### Building DonnerTanks!
 
 - your can build DonnerTanks with Unity 2017.4
-- see [DonnerUnity](https://github.com/donnerlab1/donnerunity/releases) for further information
+- see [DonnerUnity](https://github.com/donnerlab1/donnerunity/) for further information
